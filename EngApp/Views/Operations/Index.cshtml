@@ -1,0 +1,95 @@
+﻿@{
+    ViewData["Title"] = "Index";
+}
+<br />
+<h1 style="text-align:center"> ........اختار العمليه</h1>
+<body>
+    <div class="container">
+        <div class="row" style="text-align:center">
+            <div class=" col-md-3">
+                <a href="#" class="btn btn-danger" onclick="restore('/Operations/Deletecust')">حذف جميع العمليات</a>
+            </div>
+            <div class=" col-md-3">
+                <a href="#" class="btn btn-success" onclick="getdata('/Operations/day')">اجمالي اليوم</a>
+            </div>
+            <div class=" col-lg-3 col-md-2">
+                <input id="date1" type="date" class="form-control" />
+                <span style="text-align:center">
+                    بدايه
+                </span>
+            </div>
+            <div class=" col-lg-3 col-md-2">
+                <input id="date2" type="date" class="form-control" onchange="gard()" />
+                <span style="text-align:center">
+                    نهايه
+                </span>
+            </div>
+        </div>
+        <div class="row" style="text-align:center">
+            <div class=" col-md-3">
+                <a href="#" class="btn btn-success" onclick="backup('/Operations/backup')">عمل نسخه احتياطيه</a>
+            </div>
+            <div class=" col-md-3">
+                <a href="#" class="btn btn-success" onclick="getdata('/Operations/Endedopration')">العمليات المنتهيه</a>
+            </div>
+        </div>
+    </div>
+</body>
+<div class="modal fade" id="modalData" style="color:black">
+    <div class="modal-dialog modal-lg" style=" width:700px !important;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <a href="#" class="close" data-dismiss="modal">&times;</a>
+            </div>
+            <div class="modal-body" id="content">
+
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var getdata = function (url) {
+        $("#content").empty();
+        var url = url;
+        $("#content").load(url, function () {
+            $("#modalData").modal("show");
+        })
+    }
+    function restore(url) {
+        var result = confirm("هل متاكد سيتم حذف العمليات المدفوعه نهائيا !!!!");
+        if (result) {
+            $.ajax({
+                url: url,
+                type: "POST",
+                success: function () {
+                    alert("تم التنفيذ بنجاح");
+                }, error: function () {
+                    alert("حدث خطا");
+                }
+            });
+        }
+    }
+    function gard() {
+        $("#content").empty();
+        var url = "/Operations/CalcBilsWithDate" + "?date=" + $("#date1").val() + "&&date2=" + $("#date2").val();
+        $("#content").load(url, function () {
+            $("#modalData").modal("show");
+        })
+    }
+    function backup(url) {
+        var result = confirm("هل انت متاكد من عمل نسخه احتياطيه");
+        if (result) {
+            $.ajax({
+                url: url,
+                type: "POST",
+                success: function () {
+                    alert("تم التنفيذ بنجاح");
+                }, error: function () {
+                    alert("حدث خطا");
+                }
+            });
+        }
+    }
+
+</script>
+

@@ -1,0 +1,49 @@
+﻿@model EngApp.Dal.Models.Transaction
+
+@{
+    ViewData["Title"] = "Edit";
+}
+<h4>تعديل العمليات</h4>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="transactionId" />
+            <div class="form-group">
+                <label asp-for="transactionName" class="control-label"></label>
+                <input id ="transactionName" asp-for="transactionName" class="form-control" />
+                <span asp-validation-for="transactionName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" onclick="create(@Model.transactionId)" value="حفظ التعديل" class="btn btn-primary" />
+            </div>
+    </div>
+</div>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+<script>
+    function create(id) {
+        var data = new Object();
+        data.transactionName = $("#transactionName").val();
+        data.transactionId = id;
+        if (data.transactionName == "") {
+            alert("ادخل قيمه");
+            return
+        }
+        data.isdel = false;
+        $.ajax({
+            url: "/Transactions/Edit",
+            type: "POST",
+            data: { transaction: data },
+            success: function (data) {
+                if (data == null) {
+                    alert("حدث خطا");
+                }
+                location.reload();
+            }
+        })
+    }
+</script>

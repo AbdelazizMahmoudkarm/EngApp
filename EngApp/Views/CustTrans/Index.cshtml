@@ -1,0 +1,211 @@
+﻿@model PaginatedList<EngApp.Dal.Models.CustTrans>
+
+@{
+    ViewData["Title"] = "Index";
+}
+<style>
+    #modalData {
+        overflow-y: scroll
+    }
+
+    tr,th,td {
+        border:1px dashed black;
+    }
+    body {
+        font-size: large;
+    }
+</style>
+<div class="row">
+    <div class="col-md-4">
+        <div class="input-group-prepend">
+            <i class="fa fa-search alert" style="box-sizing:padding-box"></i>
+            <input class="form-control" id="search" placeholder=" اكتب الاسم " oninput="search()" />
+        </div>
+    </div>
+    <div class="col-md-5"></div>
+    <div class="col-md-3">
+        <a href="#" onclick="data('/CustTrans/Create')" class="btn btn-danger fa fa-plus">انشاء معامله جديده</a>
+    </div>
+</div>
+@if (Model.Count() == 0)
+{
+    <div class="row">
+        <div class="col-lg-12" style="text-align:center; font-size:xx-large;font-weight:bold;color:red"> لاتوجد بيانات</div>
+    </div>
+}
+else
+{
+    <table class="table table-striped border">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model[0].Customer.customerName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model[0].Transaction.transactionName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model[0].date)
+                </th>
+                <th>انتهي العمل بتاريخ</th>
+                <th>
+                    @Html.DisplayNameFor(model => model[0].totalmoney)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model[0].paid)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model[0].change)
+                </th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="datasearch" style="font-size:large">
+            @foreach (var item in Model)
+            {
+                <tr id="@item.custtransId">
+                    <td>
+                        <a href="/CustTrans/paperdata?id=@item.custtransId">@item.Customer.customerName</a>
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Transaction.transactionName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.date)
+                    </td>
+                    @if (item.end)
+                    {
+                        <td>@item.enddate</td>
+                    }
+                    else
+                    {
+                        <td>......قيد العمل</td>
+                    }
+                    <td>
+                        @Html.DisplayFor(modelItem => item.totalmoney)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.paid)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.change)
+                    </td>
+                    <td>
+                        <a href="#" onclick="data('/CustTrans/Edit',@item.custtransId)" class="btn btn-dark fa fa-edit"> تعديل </a>
+                    </td>
+                    <td>
+                        <a href="#" onclick="del('/CustTrans/Delete',@item.custtransId,'@item.Customer.customerName')" class="btn btn-danger fa fa-trash"> حذف </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<div class="modal fade" id="modalData" style="color:black">
+    <div class="modal-dialog modal-lg" style=" width:900px !important;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <a href="#" class="close" data-dismiss="modal">&times;</a>
+            </div>
+            <div class="modal-body" id="content">
+
+            </div>
+        </div>
+    </div>
+</div>
+@{
+    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+}
+<div style="position: absolute; bottom: 60px">
+    <a asp-action="Index"
+       asp-route-sortOrder="@ViewData["CurrentSort"]"
+       asp-route-pageNumber="@(Model.PageIndex - 1)"
+       asp-route-currentFilter="@ViewData["CurrentFilter"]"
+       class="btn btn-success @prevDisabled">
+
+        <span class="fa fa-backward"></span>
+    </a>
+    <a asp-action="Index"
+       asp-route-sortOrder="@ViewData["CurrentSort"]"
+       asp-route-pageNumber="@(Model.PageIndex + 1)"
+       asp-route-currentFilter="@ViewData["CurrentFilter"]"
+       class="btn btn-success @nextDisabled">
+        <span class="fa fa-forward"></span>
+    </a>
+</div>
+<script>
+    document.getElementById("search").focus();
+    function data(url, id) {
+        $("#content").empty();
+        var url = url + "?id=" + id;
+        $("#content").load(url, function () {
+            $("#modalData").modal("show");
+        })
+    }
+    function del(url, id, name) {
+        var result = confirm(" هل انت متاكد من حذف معاملة " + name + " يمكن استعادتها");
+        if (result) {
+            $.ajax({
+                url: url,
+                type: "POST",
+                data: { id: id },
+                success: function (data) {
+                    if (data != null) {
+                        $("#" + id).css("background-color", "#ff6347").fadeOut(800, function () {
+                            $(this).remove();
+                        })
+                    } else {
+                        alert("غير مصرح لك بالحذف");
+                        return;
+                    }
+                }
+            });
+        }
+    }
+    function search() {
+        var searchvalue = $("#search").val();
+        if (searchvalue == 0) {
+            location.reload();
+        }
+        if (searchvalue == '') return;
+        var setdata = $("#datasearch");
+        var mortagah = "";
+        setdata.html("");
+        var isbuy = false;
+        $.ajax({
+            url: "/CustTrans/Search",
+            dataType: "json",
+            data: { name: searchvalue },
+            success: function (data) {
+                if (data.length == 0) {
+                    setdata.append('<tr style="color:red;text-align:center"><td colspan="11"> لا توجد بيانات</td></tr>');
+                    return;
+                } else {
+                    $.each(data, function (index, value) {
+                        var text = ""
+                        if (value.end)
+                            text = value.enddate;
+                        else
+                            text = ".....قيد العمل"
+                        var dataa = "<tr id=" + value.custtransId + ">" +
+                            " <td><a href =" + "/CustTrans/paperdata?id=" + value.custtransId + ">" + value.customer.customerName + "</a></td>" +
+                            "<td>" + value.transaction.transactionName + "</td>" +
+                            "<td>" + value.date + "</td>" +
+                            "<td>" + text + "</td>" +
+                            "<td>" + value.totalmoney + "</td>" +
+                            "<td>" + value.paid + "</td>" +
+                            "<td> " + value.change + "</td>"
+                            + '<td><a href="#"  class="btn btn-dark fa fa-edit" onclick="data(\'' + '/CustTrans/Edit' + '\',\'' + value.custtransId + '\')">  تعديل </a></td>'
+                            + '<td><a href="#" class="btn btn-danger fa fa-trash" onclick="del(\'' + '/CustTrans/Delete' + '\',\'' + value.custtransId + '\',\'' + value.customer.customerName + '\')"> حذف </a></td>'
+                            + "</tr>";
+                        setdata.append(dataa)
+                    });
+                }
+            },
+            error: function (xhr, status, error) {
+            }
+        });
+    }
+</script>

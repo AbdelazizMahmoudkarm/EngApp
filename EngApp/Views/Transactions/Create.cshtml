@@ -1,0 +1,46 @@
+﻿@model EngApp.Dal.Models.Transaction
+
+@{
+    ViewData["Title"] = "Create";
+}
+<h4>عمليات</h4>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label  asp-for="transactionName" class="control-label"></label>
+                <input  id="transactionName" asp-for="transactionName" class="form-control" />
+                <span asp-validation-for="transactionName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="button"onclick="create()" value="انشاء جديد" class="btn btn-primary" />
+            </div>
+    </div>
+</div>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+<script>
+    function create() {
+        var data = new Object();
+        data.transactionName = $("#transactionName").val();
+        if (data.transactionName == "") {
+            alert("ادخل قيمه");
+            return 
+        }
+        data.isdel = false;
+        $.ajax({
+            url: "/Transactions/Create",
+            type: "POST",
+            data: { transaction: data },
+            success: function (data) {
+                if (data == null) {
+                    alert("حدث خطا");
+                    return;
+                }
+                location.reload();
+            }
+        })
+    }
+</script>

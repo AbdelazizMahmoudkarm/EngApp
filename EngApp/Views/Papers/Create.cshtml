@@ -1,0 +1,46 @@
+﻿@model EngApp.Dal.Models.Paper
+
+@{
+    ViewData["Title"] = "Create";
+}
+<h4>طلبات الورق</h4>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label  asp-for="paperName" class="control-label"></label>
+                <input  id="paperName" asp-for="paperName" class="form-control" />
+                <span asp-validation-for="paperName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="button"onclick="create()" value="انشاء جديد" class="btn btn-primary" />
+            </div>
+    </div>
+</div>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+<script>
+    function create() {
+        var data = new Object();
+        data.paperName = $("#paperName").val();
+        if (data.paperName == "") {
+            alert("ادخل قيمه");
+            return 
+        }
+        data.isdel = false;
+        $.ajax({
+            url: "/Papers/Create",
+            type: "POST",
+            data: { paper: data },
+            success: function (data) {
+                if (data == null) {
+                    alert("حدث خطا");
+                    return;
+                }
+                location.reload();
+            }
+        })
+    }
+</script>

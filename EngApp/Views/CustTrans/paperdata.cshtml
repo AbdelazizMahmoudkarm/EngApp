@@ -1,0 +1,139 @@
+﻿@model EngApp.Dal.Models.CustTrans
+
+@{
+    Layout = null;
+}
+<head>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link href="~/lib/font-awesome/css/all.css" rel="stylesheet" />
+    <style>
+        tr, th, td {
+            border: 1px solid black;
+        }
+
+        thead {
+            text-align: center;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+    </style>
+</head>
+
+@if (Model == null)
+{
+    <p style="text-align:center;font-size:larger;font-weight:bold; color:red"> لا توجد عناصر للعرض</p>
+}
+else
+{
+    <br />
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-2">
+            <div class="panel panel-default" style="position:center">
+                <a href="/CustTrans/PrintTransaction?Id=@Model.custtransId" target="_blank" class="btn btn-dark fa fa-print"> </a>
+                <div id="txt" style="text-align:center"> </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <h1 style="text-align:center">التفاصيل</h1>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-1"></div>
+        <div class="col-md-8">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>
+                            <strong> رقم العمليه: </strong>   @Model.custtransId
+                        </th>
+                        <th colspan="2">
+                            <strong>  اسم العميل: </strong>  @Model.Customer.customerName
+                        </th>
+
+                    </tr>
+                    <tr>
+                        <th colspan="1">
+                            <strong> التاريخ : </strong>   @Model.date
+                        </th>
+                        @if (Model.end)
+                        {
+                    <th> <strong>تاريخ الانتهاء : </strong>@Model.enddate</th>
+                        }
+                        else
+                        {
+                      <th><strong>تاريخ الانتهاء : </strong>......قيد العمل</th>
+                        }
+                        <th>
+                            <strong> اسم العمليه: </strong>   @Model.Transaction.transactionName
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th colspan="2"> الورق المطلوب</th>
+                        <th> تم التسليم ؟</th>
+                    </tr>
+                    @foreach (var item in Model.paperlist)
+                    {
+                        <tr>
+                            <td colspan="2">
+                                @Html.DisplayFor(modelItem => item.paperName)
+                            </td>
+                            <td>
+                                @if (item.required == true)
+                                {
+                                    <strong> تم التسليم</strong>
+                                }
+                                else
+                                {
+                                    <strong>لم يتم التسليم</strong>
+                                }
+
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot style="background-color:gray">
+                    <tr>
+                        <th>
+                            @Model.totalmoney : المبلغ الكلي
+                        </th>
+                        <th>
+                            @Model.paid.ToString("0.00")  : المدفوع
+                        </th>
+                        <th>
+                            @Model.change.ToString("0.00") : الباقي
+                        </th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <div class="col-md-3">
+            <table>
+                <thead class="table table-striped">
+                    <tr>
+                        <th>المدفوع</th>
+                        <th>التاريخ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var data in Model.paymentlist)
+                    {
+                        <tr>
+                            <td>@data.paid</td>
+                            <td>@data.date</td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+}
+<script src="~/lib/jquery/dist/jquery.min.js"></script>

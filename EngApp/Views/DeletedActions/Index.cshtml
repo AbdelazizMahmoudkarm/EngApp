@@ -1,0 +1,177 @@
+﻿@model IEnumerable<EngApp.Dal.Models.CustTrans>
+
+@{
+    ViewData["Title"] = "DeletedData";
+}
+
+<style>
+    body {
+        font-size: large;
+    }
+</style>
+<div class="row">
+    <div class="col-md-4">
+        <div class="input-group-prepend">
+            <i class="fa fa-search alert" style="box-sizing:padding-box"></i>
+            <input class="form-control" id="search" placeholder=" اكتب الاسم " oninput="search()" />
+        </div>
+    </div>
+    <div class="col-md-5"></div>
+    <h1>العمليات المحذوفه</h1>
+</div>
+@if (Model.Count() == 0)
+{
+    <div class="row">
+        <div class="col-lg-12" style="text-align:center; font-size:xx-large;font-weight:bold;color:red"> لاتوجد محذوفات</div>
+    </div>
+}
+else
+{
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Customer.customerName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Transaction.transactionName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.date)
+            </th>
+            <th>انتهي العمل بتاريخ</th>
+            <th>
+                @Html.DisplayNameFor(model => model.totalmoney)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.paid)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.change)
+            </th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody id="datasearch" style="font-size:large">
+        @foreach (var item in Model)
+        {
+            <tr id="@item.custtransId">
+                <td>
+                    <a href="/CustTrans/paperdata?id=@item.custtransId">@item.Customer.customerName</a>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Transaction.transactionName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.date)
+                </td>
+                @if (item.end)
+                {
+                    <td>@item.enddate</td>
+                }
+                else
+                {
+                    <td>......قيد العمل</td>
+                }
+                <td>
+                    @Html.DisplayFor(modelItem => item.totalmoney)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.paid)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.change)
+                </td>
+                <td>
+                    <a href="#" onclick="restore('/CustTrans/Restore',@item.custtransId)" class="btn btn-dark fa fa-edit">استعاده</a>
+                </td>
+                <td>
+                    <a href="#" onclick="perdel('/CustTrans/PerDelete',@item.custtransId,'@item.Customer.customerName')" class="btn btn-danger fa fa-trash">حذف</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+}
+<script>
+    document.getElementById("search").focus();
+    function restore(url, id) {
+        var result = confirm(" هل انت متاكد من استعادة معاملة ");
+        if (result) {
+            $.ajax({
+                url: url,
+                type: "POST",
+                data: { id: id },
+                success: function (data) {
+                    if (data != null) {
+                        $("#" + id).css("background-color", "#23b50d").fadeOut(800, function () {
+                            $(this).remove();
+                        })
+                    }
+                }
+            });
+        }
+    }
+    function perdel(url, id, name) {
+        var result = confirm(" هل انت متاكد من حذف معاملة " + name + " نهااائيا!!!!");
+        if (result) {
+            $.ajax({
+                url: url,
+                type: "POST",
+                data: { id: id },
+                success: function (data) {
+                    if (data != null) {
+                        $("#" + id).css("background-color", "#ff6347").fadeOut(800, function () {
+                            $(this).remove();
+                        })
+                    }
+                }
+            });
+        }
+    }
+    function search() {
+        var searchvalue = $("#search").val();
+        if (searchvalue == 0) {
+            location.reload();
+        }
+        if (searchvalue == '') return;
+        var setdata = $("#datasearch");
+        var mortagah = "";
+        setdata.html("");
+        var isbuy = false;
+        $.ajax({
+            url: "/DeletedActions/Search",
+            dataType: "json",
+            data: { name: searchvalue },
+            success: function (data) {
+                if (data.length == 0) {
+                    setdata.append('<tr style="color:red;text-align:center"><td colspan="11"> لا توجد بيانات</td></tr>');
+                    return;
+                } else {
+                    $.each(data, function (index, value) {
+                        var text = ""
+                        if (value.end)
+                            text = value.enddate;
+                        else
+                            text = ".....قيد العمل"
+                        var dataa = "<tr  id=" + value.custtransId + ">" +
+                            " <td><a href =" + "/CustTrans/paperdata?id=" + value.custtransId + ">" + value.customer.customerName + "</a></td>" +
+                            "<td>" + value.transaction.transactionName + "</td>" +
+                            "<td>" + value.date + "</td>" +
+                            "<td>" + text + "</td>" +
+                            "<td>" + value.totalmoney + "</td>" +
+                            "<td>" + value.paid + "</td>" +
+                            "<td> " + value.change + "</td>"
+                            + '<td><a href="#"  class="btn btn-dark fa fa-edit" onclick="restore(\'' + '/CustTrans/Restore' + '\',\'' + value.custtransId + '\')"> استعاده</a></td>'
+                            + '<td><a href="#" class="btn btn-danger fa fa-trash" onclick="perdel(\'' + '/CustTrans/PerDelete' + '\',\'' + value.custtransId + '\',\'' + value.customer.customerName + '\')"> حذف </a></td>'
+                            + "</tr>";
+                        setdata.append(dataa)
+                    });
+                }
+            },
+            error: function (xhr, status, error) {
+            }
+        });
+    }
+</script>

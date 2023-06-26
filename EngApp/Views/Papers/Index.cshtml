@@ -1,0 +1,93 @@
+﻿@model PaginatedList<EngApp.Dal.Models.Paper>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div class="row" style="font-size:x-large">
+    <div class="col-md-4"> <a href="#" class="btn btn-success fa fa-plus" onclick="getdata('/Papers/Create')"> ورق جديد</a></div>
+    <div class="col-md-5"> الورق</div>
+</div>
+<br />
+<table class="table table-striped border" style="text-align:center;font-size:large">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model[0].paperName)
+            </th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr id="@item.paperId">
+                <td>
+                    @Html.DisplayFor(modelItem => item.paperName)
+                </td>
+                <td><a href="#" class="btn btn-dark fa fa-edit" onclick="getdata('/Papers/Edit',@item.paperId)">تعديل</a> </td>
+                <td>
+                    <a href="#" class="btn btn-danger fa fa-trash" onclick="del(@item.paperId,'@item.paperName')">حذف</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<div class="modal fade" id="modalData" style="color:black">
+    <div class="modal-dialog modal-lg" style=" width:700px !important;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <a href="#" class="close" data-dismiss="modal">&times;</a>
+            </div>
+            <div class="modal-body" id="content">
+
+            </div>
+        </div>
+    </div>
+</div>
+@{
+    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+}
+<div style="position: absolute; bottom: 60px">
+    <a asp-action="Index"
+       asp-route-sortOrder="@ViewData["CurrentSort"]"
+       asp-route-pageNumber="@(Model.PageIndex - 1)"
+       asp-route-currentFilter="@ViewData["CurrentFilter"]"
+       class="btn btn-success @prevDisabled">
+
+        <span class="fa fa-backward"></span>
+    </a>
+    <a asp-action="Index"
+       asp-route-sortOrder="@ViewData["CurrentSort"]"
+       asp-route-pageNumber="@(Model.PageIndex + 1)"
+       asp-route-currentFilter="@ViewData["CurrentFilter"]"
+       class="btn btn-success @nextDisabled">
+        <span class="fa fa-forward"></span>
+    </a>
+</div>
+<script>
+    function getdata(url, id) {
+        $("#content").empty();
+        var url = url + "?id=" + id;
+        $("#content").load(url, function () {
+            $("#modalData").modal("show");
+        })
+    }
+    function del(id, name) {
+        var result = confirm("هل انت متاكد من حذف " + name);
+        if (result) {
+            $.ajax({
+                url: "/Papers/Delete",
+                type: "POST",
+                data: { id: id },
+                success: function () {
+                    $("#" + id).css("background-color", "#ff6347").fadeOut(800, function () {
+                        $(this).remove();
+                    });
+                }
+            })
+        }
+    }
+</script>

@@ -1,0 +1,266 @@
+﻿@model EngApp.Dal.Models.CustTrans
+
+@{
+    ViewData["Title"] = "Edit";
+}
+<style>
+    td,th{
+        font-size:large;
+    }
+</style>
+<h5 style="text-align:center;font-size:x-large"> تعديل المعامله رقم @Model.custtransId</h5>
+<div class="col-md-12">
+    <div class="row" style="padding-bottom:5px">
+        <div class="col-md-4"></div>
+        <input type="checkbox" class="form-control" style="width:25px;height:25px" id="checkend" checked="@Model.end" />
+        <div class="col-md-3">
+          هل انتهي العمل ؟
+        </div>
+    </div>
+
+    <div class="row">
+        <input type="hidden" id="customerId" value="@Model.customerId" />
+        <input type="hidden" id="custtransId" value="@Model.custtransId"/>
+        <div class="col-md-2">
+            اسم العميل
+        </div>
+        <div class="col-md-4">
+            <input id="customername" value="@Model.Customer.customerName" class="form-control" type="text" />
+        </div>
+        <div class="col-md-2">
+            نوع العمليه
+        </div>
+        <div class="col-md-3">
+            <select id="tranactionlist" asp-for="transactionId" class="form-control" asp-items="ViewBag.transactionId"></select>
+        </div>
+    </div>
+    <hr />
+    <div class="row" style="margin-top:5px;margin-bottom:5px">
+        <div class="col-md-2">المبلغ الكلي</div>
+        <div class="col-md-3"><input type="number" value="@Model.totalmoney" class="form-control" id="totalmoney" /></div>
+        <div class="col-md-2"></div>
+        <div class="col-md-1">المدفوع</div>
+        <input type="hidden" id="change" value="@Model.change" />
+        <div class="col-md-3"><input type="number" class="form-control" id="paid" oninput="computechange()" /></div>
+    </div>
+    <div class="row">
+        <div class="col-md-2">الورق المطلوب</div>
+        <div class="col-md-5"><input id="paper" class="form-control" type="text" onfocusout="getid()" /></div>
+        <input type="hidden" id="paperid" />
+        <div class="col-md-2">تم احضاره</div>
+        <div class="col-md-1">  <input type="checkbox" class="form-control" style="width:25px;height:25px" id="checkdata" /></div>
+        <div class="justify-content-md-end"><input type="button" onclick="Add()" value="اضافة" style="width:90px;height:40px;font-size:large" class="btn btn-danger" /></div>
+    </div>
+</div>
+<hr />
+<table id="detailsTable" class="table table-striped">
+    <thead>
+        <tr>
+            <th>الورق المطلوب</th>
+            <th>هل موجود</th>
+            <th>حذف</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.paperlist)
+        {
+        <tr id="@item.paperdataId">
+            <td>@item.paperName</td>
+            <td> <input type="checkbox" id="_@item.paperdataId"  style="width:25px;height:25px" checked="@item.required"/></td>
+            <td style="display:none">@item.paperId</td>
+            <td style="display:none">@item.paperdataId</td>
+            <td style="display:none">@item.custtransId</td>
+            <td><a href="#" onclick="deledit(@item.paperdataId,'@item.paperName')" style="width:90px;height:35px" class="btn btn-danger fa fa-trash"></a></td>
+        </tr>
+        }
+    </tbody>
+</table>
+<div class="row">
+    <div class="col-md-1">الباقي</div>
+    <div class="col-md-1">
+        <input disabled id="changes" style="width:100px;" />
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button id="saveOrder" style="width:90px;height:40px;font-size:large" type="submit" class="btn btn-success">حفظ</button>
+</div>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+<script>
+    //autocomplete
+    $("#paper").autocomplete({
+        appendTo: $("#modalData"),
+        select: function (event, ui) {
+            //alert(ui.item.value)
+            $.ajax({
+                url: "/CustTrans/GetIdForPaper",
+                dataType: "json",
+                data: { paperName: ui.item.value },
+                success: function (data) {
+                    $("#paperid").val(data);
+                }
+            })
+        },
+        source: function (request, response) {
+            $.ajax({
+                url: "/CustTrans/AutoComplete",
+                dataType: "json",
+                data: { search: $("#paper").val() },
+                success: function (data) {
+                    response($.map(data, function (item) {
+                        return { label: item.itemName, value: item.itemName };
+                    }));
+                },
+                error: function (xhr, status, error) {
+                    alert("Error");
+                }
+            });
+        }
+    })
+    function getid() {
+        if ($("#paperid").val() == "") {
+            $.ajax({
+                url: "/CustTrans/GetIdForPaper",
+                dataType: "json",
+                data: { paperName: $("#paper").val() },
+                success: function (data) {
+                    $("#paperid").val(data);
+                },
+                error: function (xhr, status, error) {
+                    // alert("Error");
+                }
+            });
+        }
+    }
+    //-------------------------------------
+    function computechange() {
+        //var totalmoney = $("#totalmoney").val(),
+           var paid = $("#paid").val(),
+            change = $("#change").val();
+        $("#changes").val((change- paid).toFixed(2));
+    }
+    //function gettarns() {
+    //    $.ajax({
+    //        type: "POST",
+    //        url: "/CustTrans/ListTrans",
+    //        success: function (data) {
+    //            var transaction = '';
+    //            $.each(data, function (index, val) {
+    //                transaction += '<option value=' + val.transactionId + '>' + val.transactionName + '</option >'
+    //            });
+    //            $("#tranactionlist").html(transaction);
+    //        }
+    //    })
+    //}
+
+    function Add() {
+        var paper = $("#paper").val(),
+            detailsTableBody = $("#detailsTable tbody"),
+            paperid = $("#paperid").val();
+        var checked = "لا";
+        if ($("#checkdata").is(":checked") == true)
+            checked = "نعم";
+        if (paper == "" || paperid == "") {
+            alert("تاكد من اختيار الورق");
+            return;
+        }
+        var data = "<tr>"
+            + "<td style='font-size:large'>" + paper + "</td>"
+            + "<td style='font-size:large'>" + checked + "</td>"
+            + "<td style='display:none'>" + paperid + "</td>"
+            + "<td style='display:none'>" + 0 + "</td>"
+            + "<td style='display:none'>" + 0 + "</td>"
+            + '<td><a data-itemId="0" href="#" style="font-size:large" class="deleteItem"> حذف </a></td>'
+            + "</tr > ";
+        detailsTableBody.append(data);
+        cleardata();
+    }
+    function cleardata() {
+        $("#paper").val("");
+        $("#checkdata").prop("checked", false);
+        $("#paperid").val("");
+    }
+    $(document).on('click', 'a.deleteItem', function (e) {
+        e.preventDefault();
+        if ($(this).attr('data-itemId') == "0") {
+            $(this).parents('tr').css("background-color", "#ff6347").fadeOut(800, function () {
+                $(this).remove();
+            });
+        }
+    });
+    $("#saveOrder").click(function (e) {
+        e.preventDefault();
+        var customername = $("#customername").val(),
+            tarnactionId = $("#tranactionlist").val(),
+            totalmoney = $("#totalmoney").val(),
+            paid = $("#paid").val();
+        var paperlist = [];
+        $.each($("#detailsTable tbody tr"), function () {
+            var paperData = new Object();
+            paperData.paperName = $(this).find('td:eq(0)').html();
+            paperData.isdel = false;
+            paperData.paperId = $(this).find('td:eq(2)').html();
+            paperData.paperdataId = $(this).find('td:eq(3)').html();
+            paperData.custtransId = $(this).find('td:eq(4)').html();
+            var require = false;
+            if ($(this).find('td:eq(1)').html() == "نعم") 
+                paperData.required = true;
+            else if ($("#_" + paperData.paperdataId).is(":checked") == true || $("#_" + paperData.paperdataId).is(":checked") == false) 
+                paperData.required = $("#_" + paperData.paperdataId).is(":checked");
+            else 
+                paperData.required = require;
+            paperlist.push(paperData);
+        });
+        //if (paperlist.length == 0) {
+        //    alert("لاتوجد بيانات ");
+        //    return;
+        //}
+        if (tarnactionId == "" || customername == "" || totalmoney == "") {
+            alert("من فضلك تاكد من ادخال البيانات");
+            return;
+        }
+        var data = new Object();
+        data.customerId = $("#customerId").val();
+        data.custtransId = $("#custtransId").val();
+        data.transactionId = tarnactionId;
+        data.end = $("#checkend").is(":checked");
+        data.Customer = new Object();
+        data.Customer.customerName = customername;
+        data.Customer.customerId = $("#customerId").val();
+        data.totalmoney = totalmoney;
+        data.paid = paid;
+        data.isdel = false;
+        data.paperlist = paperlist;
+        $.ajax({
+            type: "POST",
+            url: "/CustTrans/Edit",
+            data: { custTrans: data },
+            success: function (data) {
+                if (data != null)
+                    location.reload();
+            }
+        })
+    })
+    function deledit(id, name) {
+        var result = confirm("هل انت متاكد من حذف " + name);
+        if (result) {
+            $.ajax({
+                url: "/CustTrans/DeleteEdit",
+                type: "POST",
+                data: { id: id },
+                success: function (data) {
+                    if (data != null) {
+                        $("#" + id).css("background-color", "#ff6347").fadeOut(800, function () {
+                            $(this).remove();
+                        })
+                    } else {
+                        alert("غير مصرح لك بالحذف");
+                        return;
+                    }
+                }
+            });
+        }
+    }
+</script>

@@ -1,0 +1,169 @@
+﻿@model EngApp.Dal.Models.CustTrans
+@{
+    Layout = null;
+    int index = 0;
+}
+<head>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" media="screen" />
+    <style>
+        body {
+            direction: rtl;
+            margin: 0 auto;
+        }
+
+        .just {
+            display: flex;
+            align-items: center;
+        }
+
+        span {
+            padding: 15px;
+        }
+
+        .p {
+            border: 1px solid black;
+            font-size: large;
+            border-radius: 15px;
+            text-align: center
+        }
+
+        table {
+            text-align: center;
+            border-collapse: collapse;
+            margin: 0 auto;
+        }
+
+        th, td {
+            border: 1px solid black;
+            height: 30px
+        }
+     /*   @@page {
+            size: A3 portrait;
+            margin-top: 4mm;
+            margin-bottom: 135mm;
+        }*/
+        /*  table thead::before {
+                counter-increment: page;
+                counter-reset: page 1;
+                content: "Page " counter(pages) " of " counter(page);
+            }*/
+    </style>
+</head>
+@{
+    if (Model == null)
+    {
+        <p style="text-align:center;font-size:larger;font-weight:bold; color:red"> لا توجد عناصر للعرض</p>
+    }
+    else
+    {
+
+    <div class="row" >
+        <div class="col-md-3"></div>
+        <div id="dd" class="col-md-7">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th colspan="3">
+                            <div class="p">
+                                <span style="font-size:x-large;"> شراره للمقاولات والانشاءات</span>
+                                <div class="just">
+                                    <span>
+                                        <span> تصميمات انشائيه ومعماريه</span>
+                                        <br />
+                                        <span> اشراف وتنفيذ وعمل تراخيص</span>
+                                    </span>
+                                    <img src="~/Img/3.jpg" width="140" height="70" />
+                                    <span>
+                                        <span> المهندس/محمد شراره</span>
+                                        <br />
+                                        <span> اويش الحجر-مركز المنصوره</span>
+
+                                    </span>
+                                </div>
+                                <span> رقم :01152025732--01015186024 </span>
+                            </div>
+                        </th>
+                    </tr>
+                    <tr style="background-color:lightgray; text-align:center">
+                        <th>رقم العمليه: @Model.custtransId </th>
+                        <th>اسم العميل : @Model.Customer.customerName</th>
+                        <th><div id="txt"></div></th>
+                    </tr>
+                    <tr>
+                        <th colspan="1">
+                            <strong> التاريخ : </strong>   @Model.date
+                        </th>
+                        @if (Model.end)
+                        {
+                            <th> <strong>تاريخ الانتهاء : </strong>@Model.enddate</th>
+                        }
+                        else
+                        {
+                            <th><strong>تاريخ الانتهاء : </strong>قيد العمل......</th>
+                        }
+                        <th colspan="1" style="text-align:center">اسم العمليه : @Model.Transaction.transactionName </th>
+                    </tr>
+                    <tr>
+                        <th>الورق المطلوب</th>
+                        <th>تم التسليم؟</th>
+                        <th>ملاحظات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.paperlist)
+                    {
+                        index++;
+                        <tr>
+                            <td>@item.paperName</td>
+                            <td>
+                                @if (item.required == true)
+                                {
+                                    <strong> تم التسليم</strong>
+                                }
+                                else
+                                {
+                                    <strong>لم يتم التسليم</strong>
+                                }
+                            </td>
+                            <td>    </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr style="background-color:lightgray">
+                        <th> المبلغ الكلي: @Model.totalmoney جنيه</th>
+                        <th>المدفوع: @Model.paid.ToString("0.00") جنيه</th>
+                        <th>الباقي: @Model.change.ToString("0.00") جنيه</th>
+                    </tr>
+                </tfoot>
+                @if (Model.paymentlist != null)
+                {
+                    <tr style="background-color:lightgray">
+                        <th>المدفوع</th>
+                        <th colspan="2">تاريخ الدفع</th>
+                    </tr>
+                    @foreach (var data in Model.paymentlist)
+                    {
+                        <tr>
+                            <td>@data.paid<strong> جنيه</strong></td>
+                            <td colspan="2">@data.date</td>
+                        </tr>
+                    }
+                }
+            </table>
+        </div>
+        <div class="col-md-2"></div>
+    </div>
+    }
+}
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+@section scripts{
+}
+<script>
+    $(document).ready(function () {
+        var count =@index;
+        $("#txt").text("عدد العناصر : " + count);
+          print();
+    });
+</script>
+

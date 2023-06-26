@@ -1,0 +1,76 @@
+﻿@model IEnumerable<EngApp.Dal.Models.CustTrans>
+
+@{
+    Layout = null;
+    double totalpaid = 0;
+    double total = 0;
+    double totalchange = 0;
+}
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.custtransId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Customer.customerName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Transaction.transactionName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.date)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.totalmoney)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.paid)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.change)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.custtransId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Customer.customerName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Transaction.transactionName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.date)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.totalmoney)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.paid)
+                    @{totalpaid=totalpaid+item.paid;
+                        total = total + item.totalmoney;
+                        totalchange = totalchange + item.change;
+                        }
+                </td>
+                <td>
+                    @item.change.ToString("0.00")
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<table style="text-align:center" class="table table-bordered table-hover">
+    <tr>
+        <td colspan="8" style="color:darkgreen;font-size:xx-large; font-weight:bold">  @total.ToString("0.00") : الاجمالي</td>
+    </tr>
+    <tr>
+        <td colspan="4" style="color:darkgreen;font-size:x-large; font-weight:bold">  @totalpaid.ToString("0.00") : اجمالي المدفوع </td>
+        <td colspan="4" style="color:darkgreen;font-size:x-large; font-weight:bold">  @totalchange.ToString("0.00") : اجمالي الباقي </td>
+    </tr>
+</table>

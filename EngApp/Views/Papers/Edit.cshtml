@@ -1,0 +1,50 @@
+﻿@model EngApp.Dal.Models.Paper
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>تعديل الورق</h1>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="paperId" />
+            <div class="form-group">
+                <label asp-for="paperName" class="control-label"></label>
+                <input id ="paperName" asp-for="paperName" class="form-control" />
+                <span asp-validation-for="paperName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" onclick="create(@Model.paperId)" value="حفظ التعديل" class="btn btn-primary" />
+            </div>
+    </div>
+</div>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+<script>
+    function create(id) {
+        var data = new Object();
+        data.paperName = $("#paperName").val();
+        data.paperId = id;
+        if (data.paperName == "") {
+            alert("ادخل قيمه");
+            return
+        }
+        data.isdel = false;
+        $.ajax({
+            url: "/Papers/Edit",
+            type: "POST",
+            data: { paper: data },
+            success: function (data) {
+                if (data == null) {
+                    alert("حدث خطا");
+                }
+                location.reload();
+            }
+        })
+    }
+</script>

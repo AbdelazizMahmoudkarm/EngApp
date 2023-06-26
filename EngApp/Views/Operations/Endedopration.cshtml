@@ -1,0 +1,73 @@
+﻿@model IEnumerable<EngApp.Dal.Models.CustTrans>
+
+@{
+    Layout = null;
+}
+
+@if (Model.Count() == 0)
+{
+    <div class="row">
+        <div class="col-lg-12" style="text-align:center; font-size:xx-large;font-weight:bold;color:red"> لاتوجد بيانات</div>
+    </div>
+}
+else
+{
+    <table class="table table-striped border">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Customer.customerName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Transaction.transactionName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.date)
+                </th>
+                <th>انتهي العمل بتاريخ</th>
+                <th>
+                    @Html.DisplayNameFor(model => model.totalmoney)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.paid)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.change)
+                </th>
+            </tr>
+        </thead>
+        <tbody id="datasearch" style="font-size:large">
+            @foreach (var item in Model)
+            {
+                <tr id="@item.custtransId">
+                    <td>
+                        <a href="/CustTrans/paperdata?id=@item.custtransId">@item.Customer.customerName</a>
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Transaction.transactionName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.date)
+                    </td>
+                    @if (item.end)
+                    {
+                        <td>@item.enddate</td>
+                    }
+                    else
+                    {
+                        <td>......قيد العمل</td>
+                    }
+                    <td>
+                        @Html.DisplayFor(modelItem => item.totalmoney)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.paid)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.change)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

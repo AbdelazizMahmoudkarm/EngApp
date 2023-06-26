@@ -1,0 +1,207 @@
+﻿@model EngApp.Dal.Models.CustTrans
+
+@{
+    ViewData["Title"] = "Create";
+}
+<style>
+    
+</style>
+<h5 style="text-align:center">انشاء معامله جديده</h5>
+<div class="col-md-12">
+    <div class="row">
+        <div class="col-md-2">
+            اسم العميل
+        </div>
+        <div class="col-md-4">
+            <input id="customername" class="form-control" type="text" oninput="gettarns()" />
+        </div>
+        <div class="col-md-2">
+            نوع العمليه
+        </div>
+        <div class="col-md-3">
+            <select id="tranactionlist"class="form-control"></select>
+        </div>
+    </div>
+    <hr />
+    <div class="row" style="margin-top:5px;margin-bottom:5px">
+        <div class="col-md-2">المبلغ الكلي</div>
+        <div class="col-md-3"><input type="number" class="form-control" id="totalmoney" /></div>
+        <div class="col-md-2"></div>
+        <div class="col-md-1">المدفوع</div>
+        <div class="col-md-3"><input type="number" class="form-control" id="paid"  oninput="compute()"/></div>
+    </div>
+    <div class="row">
+        <div class="col-md-2">الورق المطلوب</div>
+        <div class="col-md-5"><input id="paper" class="form-control" type="text" onfocusout="getid()"/></div>
+        <input type="hidden" id="paperid" />
+        <div class="col-md-2">تم احضاره</div>
+        <div class="col-md-1">  <input type="checkbox" class="form-control" style="width:25px;height:25px" id="checkdata" /></div>
+        <div class="justify-content-md-end"><input type="button" onclick="Add()" value="اضافة" style="width:90px;height:40px;font-size:large" class="btn btn-danger" /></div>
+    </div>
+</div>
+<hr />
+        <table id="detailsTable" class="table table-striped">
+            <thead>
+                <tr>
+                    <th> م </th>
+                    <th>الورق المطلوب</th>
+                    <th>تم التسليم؟</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+<div class="row">
+    <div class="col-md-1">الباقي</div>
+    <div class="col-md-1">
+        <input disabled id="change" style="width:100px; "/> 
+    </div>
+</div>
+        <div class="modal-footer">
+            <button id="saveOrder" style="width:90px;height:40px;font-size:large" type="submit" class="btn btn-success">حفظ</button>
+        </div>
+        @section Scripts {
+            @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+        }
+        <script>
+            //autocomplete
+            $("#paper").autocomplete({
+                appendTo: $("#modalData"),
+                select: function (event, ui) {
+                    //alert(ui.item.value)
+                    $.ajax({
+                        url: "/CustTrans/GetIdForPaper",
+                        dataType: "json",
+                        data: { paperName: ui.item.value },
+                        success: function (data) {
+                            $("#paperid").val(data);
+                        }
+                    })
+                },
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/CustTrans/AutoComplete",
+                        dataType: "json",
+                        data: { search: $("#paper").val() },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.itemName, value: item.itemName };
+                            }));
+                        },
+                        error: function (xhr, status, error) {
+                            alert("Error");
+                        }
+                    });
+                }
+            })
+            function getid() {
+                if ($("#paperid").val() == "") {
+                    $.ajax({
+                        url: "/CustTrans/GetIdForPaper",
+                        dataType: "json",
+                        data: { paperName: $("#paper").val() },
+                        success: function (data) {
+                            $("#paperid").val(data);
+                        },
+                        error: function (xhr, status, error) {
+                            // alert("Error");
+                        }
+                    });
+                }
+            }
+            //-------------------------------------
+            function compute() {
+                var totalmoney = $("#totalmoney").val(),
+                    paid = $("#paid").val();
+                $("#change").val((totalmoney - paid).toFixed(2));
+            }
+            function gettarns() {
+                $.ajax({
+                    type: "POST",
+                    url: "/CustTrans/ListTrans",
+                    success: function (data) {
+                        var transaction = '';
+                        $.each(data, function (index, val) {
+                            transaction += '<option value=' + val.transactionId + '>' + val.transactionName + '</option >'
+                        });
+                        $("#tranactionlist").html(transaction);
+                    }
+                })
+            }
+            var x = 0;
+            function Add() {
+                var paper = $("#paper").val(),
+                    detailsTableBody = $("#detailsTable tbody"),
+                    paperid = $("#paperid").val();
+                var checked = "لا";
+                if ($("#checkdata").is(":checked") == true)
+                    checked = "نعم";
+                if (paper == "" || paperid=="") {
+                    alert("تاكد من اختيار الورق");
+                    return;
+                }
+                var data = "<tr>"
+                    + "<td>" + ++x + "</td>"
+                    + "<td>" + paper + "</td>"
+                    + "<td>" + checked + "</td>"
+                    + "<td style='display:none'>" + paperid + "</td>"
+                    + '<td><a data-itemId="0" href="#" class="deleteItem">Remove</a></td>'
+                    + "</tr > ";
+                detailsTableBody.append(data);
+                cleardata();
+            }
+            function cleardata() {
+                $("#paper").val("");
+                $("#checkdata").prop("checked", false);
+                $("#paperid").val("");
+            }
+            $(document).on('click', 'a.deleteItem', function (e) {
+                e.preventDefault();
+                if ($(this).attr('data-itemId') == "0") {
+                    $(this).parents('tr').css("background-color", "#ff6347").fadeOut(800, function () {
+                        $(this).remove();
+                    });
+                }
+            });
+            $("#saveOrder").click(function (e) {
+                e.preventDefault();
+                var customername = $("#customername").val(),
+                    tarnactionId = $("#tranactionlist").val(),
+                    totalmoney = $("#totalmoney").val(),
+                    paid = $("#paid").val();
+                var paperlist = [];
+                $.each($("#detailsTable tbody tr"), function () {
+                    var paperData = new Object();
+                    paperData.paperName = $(this).find('td:eq(1)').html();
+                    paperData.isdel = false;
+                    paperData.paperId = $(this).find('td:eq(3)').html();
+                    var require = false;
+                    if ($(this).find('td:eq(2)').html() == "نعم")
+                        require = true;
+                    paperData.required = require;
+                    paperlist.push(paperData);
+                });
+                if (tarnactionId == "" || customername == "" || totalmoney == "") {
+                    alert("من فضلك تاكد من ادخال البيانات");
+                    return;
+                }
+                var data = new Object();
+                data.transactionId = tarnactionId;
+                data.end = false;
+                data.Customer = new Object();
+                data.Customer.customerName = customername;
+                data.totalmoney = totalmoney;
+                data.paid = paid;
+                data.isdel = false;
+                data.paperlist = paperlist;
+                $.ajax({
+                    type: "POST",
+                    url: "/CustTrans/Create",
+                    data: { custTrans: data },
+                    success: function (data) {
+                        if (data != null)
+                            location.reload();
+                    }
+                })
+            })
+        </script>

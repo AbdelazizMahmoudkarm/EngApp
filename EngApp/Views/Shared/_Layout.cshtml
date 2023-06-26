@@ -1,0 +1,142 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>@ViewData["Title"] - ElphatehApp</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link href="~/lib/font-awesome/css/all.css" rel="stylesheet" />
+    <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+    <!-- Font Awesome CSS-->
+    <link rel="stylesheet" href="vendor/font-awesome/css/font-awesome.min.css">
+    <!-- Fontastic Custom icon font-->
+    <!-- jQuery Circle-->
+    @*<link rel="stylesheet" href="css/grasp_mobile_progress_circle-1.0.0.min.css">*@
+    <!-- Custom Scrollbar-->
+    <link rel="stylesheet" href="vendor/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.css">
+    <!-- theme stylesheet-->
+    <link rel="stylesheet" href="css/style.default.css" id="theme-stylesheet">
+    <!-- Custom stylesheet - for your changes-->
+    <link rel="stylesheet" href="css/custom.css">
+    <!-- Favicon-->
+    <style>
+        #mymodal,#modalData {
+            overflow-y: scroll
+        }
+        .ui-autocomplete {
+            max-height: 200px;
+            overflow-y: auto;
+            /* prevent horizontal scrollbar */
+            overflow-x: hidden;
+            /* add padding to account for vertical scrollbar */
+            padding-right: 20px;
+        }
+
+        li a {
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <nav class="side-navbar">
+        <div class="side-navbar-wrapper">
+            <!-- Sidebar Header    -->
+            <div class="sidenav-header d-flex align-items-center justify-content-center">
+                <!-- User Info-->
+                <div class="sidenav-header-inner text-center">
+                    <img src="/Img/user.jpg" alt="person" class="img-fluid rounded-circle">
+                    <h2 class="h5"> @User.Identity.Name</h2>
+                </div>
+                <!-- Small Brand information, appears on minimized sidebar-->
+            </div>
+            <!-- Sidebar Navigation Menus-->
+            <div class="main-menu">
+                <h5 class="sidenav-heading">اساسيه</h5>
+                <ul id="side-main-menu" class="side-menu list-unstyled">
+                    <li><a class="nav-link text-light" style="font-size:20px" asp-area="" asp-controller="Home" asp-action="Index"> <i class="fa fa-home"></i>الرئيسيه </a></li>
+                    <li><a class="nav-link text-light" style="font-size:20px" asp-area="" asp-controller="CustTrans" asp-action="Index"> <i class="fa fa-database"></i> العمليات </a></li>
+                    <li><a class="nav-link text-light" style="font-size:20px" asp-area="" asp-controller="Papers" asp-action="Index"> <i class="fa fa-hand-paper-o"></i> الورق </a></li>
+                    <li><a class="nav-link text-light" style="font-size:20px" asp-area="" asp-controller="Transactions" asp-action="Index"> <i class="fa fa-chart-area"></i> عمليات </a></li>
+
+
+                    @*<li><a href="login.html"> <i class="icon-interface-windows"></i>Login page </a></li>
+        <li> <a href="#"> <i class="icon-mail"></i>Demo
+            <div class="badge badge-warning">6 New</div></a></li>*@
+                </ul>
+            </div>
+            <div class="admin-menu">
+                <h5 class="sidenav-heading">عناصر اضافيه</h5>
+                <ul id="side-admin-menu" class="side-menu list-unstyled">
+                    <li>  <a class="nav-link text-light" style="font-size:20px" asp-area="" asp-controller="Operations" asp-action="Index"> <i class="fa fa-chart-bar"> </i>احصائيات</a></li>
+                    <li>  <a class="nav-link text-light" style="font-size:20px" asp-area="" asp-controller="DeletedActions" asp-action="Index"> <i class="fa fa-trash"> </i>المحذوفات</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="page">
+        <!-- navbar-->
+        <header class="header">
+            <nav class="navbar">
+                <div class="container-fluid">
+                    <div class="navbar-holder d-flex align-items-center justify-content-between">
+                        <div class="navbar-header">
+                            <a id="toggle-btn" href="#" class="menu-btn"><i class="fa fa-bars"> </i></a><a asp-controller="Home" asp-action="Index" class="navbar-brand">
+                                <div class="brand-text d-none d-md-inline-block" style="font-size:large;font-weight:bold"><span>Eng </span><strong class="text-primary">APP</strong></div>
+                            </a>
+                        </div>
+                        <ul class="nav-menu list-unstyled d-flex flex-md-row align-items-md-center">
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" style="font-size:20px" asp-controller="Account" asp-action="Register">تسجيل<span class="fa fa-registered"></span></a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" style="font-size:20px" asp-area="" asp-controller="Account" asp-action="ListUser">المستخدمين<span class="fa fa-user"></span></a>
+                                </li>
+                            }
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" style="font-size:20px" asp-action="LogOut" asp-controller="/Account" title="Manage"> <span class="d-none d-md-inline-block">خروج</span><i class="fa fa-sign-out"></i></a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" style="font-size:20px" asp-controller="Account" asp-action="Login" title="دخول"> <span class="d-none d-md-inline-block">دخول</span><i class="fa fa-sign-in"></i></a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        <div class="container">
+            <br />
+            <main role="main" class="pb-3">
+                @RenderBody()
+            </main>
+        </div>
+
+        <footer class="border-top footer btn-dark" style="position:fixed">
+            <div class="container">
+                &copy; 2020 - EngApp
+            </div>
+        </footer>
+    </div>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/grasp_mobile_progress_circle-1.0.0.min.js"></script>
+    <link href="~/lib/jquery/dist/jquery-ui.structure.css" rel="stylesheet" />
+    <link href="~/lib/jquery/dist/jquery-ui.theme.min.css" rel="stylesheet" />
+    <script src="~/vendor/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.concat.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/lib/jquery/dist/jquery-ui.js"></script>
+    <script src="~/js/front.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

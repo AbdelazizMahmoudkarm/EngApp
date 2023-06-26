@@ -1,0 +1,14 @@
+/* your styles go here */
+
+@page {
+   
+    
+}
+
+@media print {
+    html, body {
+        width: 210mm;
+        height: 200mm;
+    }
+    /* ... the rest of the rules ... */
+}
